@@ -2,4 +2,71 @@
 
 方案一:
 
-采用微信
+采用微信方案：AndResGuard 是一个资源混淆的工具， 可以将冗长的资源路径变短。
+
+目标：一是通过混淆资源ID长度同时利用7z深度压缩，减小了apk包大小，二是混淆后在安全性方面有一点提升，提高了逆向破解难度。
+
+用法： 在项目app.build 目录下，添加以下代码
+
+apply plugin: 'AndResGuard'
+
+
+buildscript {
+    repositories {
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.tencent.mm:AndResGuard-gradle-plugin:1.2.17'
+    }
+}
+
+andResGuard {
+    // mappingFile = file("./resource_mapping.txt")
+    mappingFile = null
+    use7zip = true
+    useSign = true
+    // It will keep the origin path of your resources when it's true
+    keepRoot = false
+    // If set, name column in arsc those need to proguard will be kept to this value
+    fixedResName = "arg"
+    // It will merge the duplicated resources, but don't rely on this feature too much.
+    // it's always better to remove duplicated resource from repo
+    mergeDuplicatedRes = true
+
+    //指定不需要进行混淆的资源路径规则，主要是一些第三方SDK，因为有些SDK的代码中引用到对应的资源文件，
+      如果对其进行混淆，会导致找不到对应资源文件，出现crash，所以不能对其资源文件进行混淆
+    whiteList = [
+     //可能出现的更多白名单 请参考：https://github.com/shwenzhang/AndResGuard/blob/master/doc/white_list.md
+    // 白名单的添加
+            // your icon
+            "R.drawable.icon",
+            // for fabric
+            "R.string.com.crashlytics.*",
+            // for google-services
+            "R.string.google_app_id",
+            "R.string.gcm_defaultSenderId",
+            "R.string.default_web_client_id",
+            "R.string.ga_trackingId",
+            "R.string.firebase_database_url",
+            "R.string.google_api_key",
+            "R.string.google_crash_reporting_api_key"
+    ]
+    compressFilePattern = [
+            "*.png",
+            "*.jpg",
+            "*.jpeg",
+            "*.gif",
+    ]
+    sevenzip {
+        artifact = 'com.tencent.mm:SevenZip:1.2.17'
+    }
+}
+
+
+
+
+
+
+
+
